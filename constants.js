@@ -535,7 +535,7 @@ export const NOTIFICATION = {
 
 export const API = {
   gemini: {
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.0-flash',
     maxOutputTokens: 500,
     temperature: 0.7,
     cacheDurationHours: 24,  // Re-generate nudges every 24 hours
