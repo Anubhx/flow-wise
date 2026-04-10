@@ -15,6 +15,7 @@ interface AuthState {
   profile: Profile | null;
   setOnboardingComplete: () => void;
   setProfile: (profile: Profile | null) => void;
+  reset: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>()(
       profile: null,
       setOnboardingComplete: () => set({ hasCompletedOnboarding: true }),
       setProfile: (profile) => set({ profile }),
+      reset: () => set({ hasCompletedOnboarding: false, profile: null }),
     }),
     {
       name: STORAGE_KEYS.HAS_COMPLETED_ONBOARDING,

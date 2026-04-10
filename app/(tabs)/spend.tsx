@@ -118,6 +118,34 @@ export default function SpendScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Stat Cards */}
+        <View style={styles.statsContainer}>
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.statsScrollContent}
+          >
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Avg. Daily</Text>
+              <Text style={styles.statValue}>
+                {CURRENCY.format(chartData.totalPaise / Math.max(1, rawTx.length ? 30 : 1), true)}
+              </Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Biggest Spend</Text>
+              <Text style={styles.statValue}>
+                {CURRENCY.format(Math.max(...rawTx.map(t => t.amount), 0), true)}
+              </Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Top Category</Text>
+              <Text style={styles.statValue}>
+                {chartData.data[0]?.label || 'None'}
+              </Text>
+            </View>
+          </ScrollView>
+        </View>
+
         <View style={styles.totalBox}>
           <Text style={styles.totalLabel}>Total Spent</Text>
           <Text style={styles.totalAmount}>{CURRENCY.format(chartData.totalPaise)}</Text>
@@ -220,8 +248,37 @@ const styles = StyleSheet.create({
   },
   periodTextActive: { color: COLORS.textPrimary },
   scrollContent: {
-    paddingHorizontal: SPACING.screenHorizontal,
+    paddingHorizontal: 0,
     paddingBottom: SPACING.huge,
+  },
+  statsContainer: {
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  statsScrollContent: {
+    paddingHorizontal: SPACING.screenHorizontal,
+    gap: SPACING.md,
+  },
+  statCard: {
+    backgroundColor: COLORS.surfaceElevated,
+    padding: SPACING.lg,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.borderEmphasized,
+    minWidth: 140,
+  },
+  statLabel: {
+    fontFamily: FONTS.body,
+    fontSize: 10,
+    color: COLORS.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  statValue: {
+    fontFamily: FONTS.displayMedium,
+    fontSize: FONT_SIZE.h4,
+    color: COLORS.textPrimary,
   },
   totalBox: { alignItems: 'center', paddingVertical: SPACING.xl },
   totalLabel: {

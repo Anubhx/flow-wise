@@ -1,15 +1,20 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useUser } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/useAuthStore';
 import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS, CURRENCY, EXPENSE_CATEGORIES } from '@/constants';
+import SalaryBanner from '@/components/home/SalaryBanner';
+import StreakChip from '@/components/home/StreakChip';
 
 export default function HomeScreen() {
   const router = useRouter();
   const db = useSQLiteContext();
+  const { user } = useUser();
   const { profile } = useAuthStore();
   
+  const userName = user?.firstName || profile?.name?.split(' ')[0] || 'there';
   const [balancePaise, setBalancePaise] = useState(0);
   const [recentTx, setRecentTx] = useState<any[]>([]);
 
@@ -70,11 +75,35 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hi {profile?.name?.split(' ')[0] || 'there'} 👋</Text>
-          <TouchableOpacity style={styles.bellBtn}>
-            <Text style={styles.bellIcon}>🔔</Text>
-          </TouchableOpacity>
+          <View>
+            <Text style={styles.greetingHeader}>Hi {userName} 👋</Text>
+            <Text style={styles.headerSubtitle}>Ready to flow?</Text>
+          </View>
+          
+          <View style={styles.headerRight}>
+            <TouchableOpacity 
+              style={styles.avatarBtn}
+              onPress={() => router.push('/profile')}
+            >
+              {user?.imageUrl ? (
+                <Image source={{ uri: user.imageUrl }} style={styles.avatarImg} />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitial}>
+                    {userName.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.bellBtn}>
+              <Text style={styles.bellIcon}>🔔</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
+        <StreakChip streakCount={5} />
+        <SalaryBanner />
 
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>Total Balance</Text>
@@ -149,10 +178,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xxl,
   },
-  greeting: {
+  greetingHeader: {
     fontFamily: FONTS.displayMedium,
     fontSize: FONT_SIZE.h2,
     color: COLORS.textPrimary,
+  },
+  headerSubtitle: {
+    fontFamily: FONTS.body,
+    fontSize: FONT_SIZE.bodySmall,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  avatarBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: COLORS.surfaceElevated,
+    borderWidth: 1,
+    borderColor: COLORS.borderEmphasized,
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  avatarFallback: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primaryBg,
+  },
+  avatarInitial: {
+    fontFamily: FONTS.displayBold,
+    fontSize: FONT_SIZE.body,
+    color: COLORS.primary,
   },
   bellBtn: {
     padding: SPACING.sm,

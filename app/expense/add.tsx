@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
+import * as Haptics from 'expo-haptics';
 import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS, EXPENSE_CATEGORIES, CURRENCY, STRINGS } from '@/constants';
 
 export default function AddExpenseScreen() {
@@ -15,6 +16,7 @@ export default function AddExpenseScreen() {
   const MAX_PAISE = 100000000; // 10,00,000 rupees in paise
 
   const handlePressNumpad = (key: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (key === 'backspace') {
       setAmountStr(s => s.slice(0, -1));
     } else if (key === '.') {
@@ -43,13 +45,41 @@ export default function AddExpenseScreen() {
 
     if (amountPaise <= 0 || !category) return;
 
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    // V1.1 Budget Logic Mock: Check if category spend > 80%
+    const categoryLimit = 500000; // Mock ₹5,000 limit for all categories
+    try {
+      const result = await db.getFirstAsync<{total: number}>(
+        `SELECT SUM(amount) as total FROM transactions WHERE category = ? AND type = 'expense'`,
+        [category]
+      );
+      const currentSpend = result?.total || 0;
+
+      if (currentSpend + amountPaise > categoryLimit * 0.8) {
+        Alert.alert(
+          "⚠️ Budget Warning",
+          "You have reached over 80% of your budget for this category. Do you still want to proceed?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Yes, Save", onPress: () => performSave(amountPaise) }
+          ]
+        );
+      } else {
+        await performSave(amountPaise);
+      }
+    } catch (e) {
+      console.error('Failed to check budget', e);
+      await performSave(amountPaise);
+    }
+  };
+
+  const performSave = async (amountPaise: number) => {
     try {
       await db.runAsync(
         `INSERT INTO transactions (amount, category, note, transaction_date, type) VALUES (?, ?, ?, ?, ?)`,
         [amountPaise, category, note, new Date().toISOString(), 'expense']
       );
-
-      // Successfully added, navigate to success
       router.replace('/expense/success');
     } catch (e) {
       console.error('Failed to add transaction', e);

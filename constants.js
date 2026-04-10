@@ -184,6 +184,7 @@ export const COLORS = {
   tabActive: PALETTE.mint,
   tabActiveBg: 'rgba(42,255,214,0.10)',
   tabInactive: PALETTE.text34,
+  white: PALETTE.white,
 };
 
 // ─────────────────────────────────────────────
@@ -535,10 +536,12 @@ export const NOTIFICATION = {
 
 export const API = {
   gemini: {
-    model: 'gemini-2.0-flash',
-    maxOutputTokens: 500,
+    model: 'gemini-2.5-flash',
+    // NOTE: Gemini 2.5 Flash uses ~400-500 "thinking" tokens before output starts.
+    // thinkingBudget: 0 disables this, but keep maxOutputTokens at 1024 as safety net.
+    maxOutputTokens: 1024,
     temperature: 0.7,
-    cacheDurationHours: 24,  // Re-generate nudges every 24 hours
+    cacheDurationHours: 12,
     maxNudges: 3,
   },
   backend: {
