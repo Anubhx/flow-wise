@@ -10,6 +10,7 @@
     <a href="https://reactnative.dev/"><img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" /></a>
     <a href="https://clerk.com/"><img src="https://img.shields.io/badge/Clerk-6C47FF?style=for-the-badge&logo=clerk&logoColor=white" alt="Clerk Auth" /></a>
     <a href="https://deepmind.google/technologies/gemini/"><img src="https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white" alt="Gemini AI" /></a>
+    <a href="https://www.behance.net/gallery/247562999/Flow-Wise-Case-Study"><img src="https://img.shields.io/badge/Behance-Case_Study-1769FF?style=for-the-badge&logo=behance&logoColor=white" alt="Behance Case Study" /></a>
   </p>
 
   <p align="center">
@@ -150,6 +151,14 @@ flowwise/
 ├── services/          # API calls (e.g., Gemini integration)
 └── utils/             # Helper functions and hooks
 ```
+
+---
+
+## 🎨 Design Case Study
+
+The full UI/UX design process, wireframes, and visual design decisions for FlowWise are documented on Behance.
+
+> **[📐 View the FlowWise Case Study on Behance →](https://www.behance.net/gallery/247562999/Flow-Wise-Case-Study)**
 
 ---
 
