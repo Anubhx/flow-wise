@@ -22,13 +22,11 @@
 
 ## 📸 Screenshots
 
-> **Note:** These links point to your local `../SCREENIMAGES/` folder. If you intend to push this to GitHub, it is highly recommended to move the screenshots inside a `screenshots` folder within this repository and update the links accordingly.
-
 | Dashboard | Transactions | Add Expense | Insights |
 | :---: | :---: | :---: | :---: |
-| <img src="../SCREENIMAGES/Home.png" alt="Dashboard" width="200"/> | <img src="../SCREENIMAGES/All tansactions.png" alt="Transactions" width="200"/> | <img src="../SCREENIMAGES/Add expense.png" alt="Add Expense" width="200"/> | <img src="../SCREENIMAGES/Insights.png" alt="Insights" width="200"/> |
+| <img src="screenshots/Home.png" alt="Dashboard" width="200"/> | <img src="screenshots/All tansactions.png" alt="Transactions" width="200"/> | <img src="screenshots/Add expense.png" alt="Add Expense" width="200"/> | <img src="screenshots/Insights.png" alt="Insights" width="200"/> |
 | **Spending** | **Goals** | **Profile** | **Onboarding** |
-| <img src="../SCREENIMAGES/Spending.png" alt="Spending" width="200"/> | <img src="../SCREENIMAGES/Goal.png" alt="Goals" width="200"/> | <img src="../SCREENIMAGES/Profile.png" alt="Profile" width="200"/> | <img src="../SCREENIMAGES/Ounboarding flow 2.png" alt="Onboarding" width="200"/> |
+| <img src="screenshots/Spending.png" alt="Spending" width="200"/> | <img src="screenshots/Goal.png" alt="Goals" width="200"/> | <img src="screenshots/Profile.png" alt="Profile" width="200"/> | <img src="screenshots/Ounboarding flow 2.png" alt="Onboarding" width="200"/> |
 
 ---
 
