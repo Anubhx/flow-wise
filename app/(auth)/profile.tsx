@@ -1,26 +1,40 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  KeyboardAvoidingView, ScrollView, Platform, Image, ActivityIndicator
+} from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { useUser } from '@clerk/clerk-expo';
 import { useAuthStore } from '@/store/useAuthStore';
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS, STRINGS, ONBOARDING } from '@/constants';
-import { Image } from 'react-native';
+import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS } from '@/constants';
+
+const PERSONAS = [
+  { id: 'first_jobber', label: 'First jobber' },
+  { id: 'freelancer', label: 'Freelancer' },
+  { id: 'student', label: 'Student' },
+] as const;
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user } = useUser();
   const { setProfile } = useAuthStore();
-  
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [persona, setPersona] = useState<any>(ONBOARDING.personas[0].id);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  // Pre-fill from Clerk user if available
+  const [name, setName] = useState(user?.fullName || '');
+  const [email, setEmail] = useState(user?.primaryEmailAddress?.emailAddress || '');
+  const [persona, setPersona] = useState<string>('first_jobber');
+  const [avatarUri, setAvatarUri] = useState<string | null>(
+    user?.imageUrl || null
+  );
+  const [uploading, setUploading] = useState(false);
 
   const handlePickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.5,
+      quality: 0.6,
     });
 
     if (!result.canceled) {
@@ -30,105 +44,94 @@ export default function ProfileScreen() {
 
   const handleContinue = () => {
     if (!name.trim()) return;
-    
-    setProfile({
-      name,
-      email,
-      persona,
-      avatarUri
-    });
-    
+    setProfile({ name: name.trim(), email, persona: persona as any, avatarUri });
     router.push('/(auth)/bank');
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
+    <KeyboardAvoidingView
+      style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header row */}
+        <View style={styles.headerRow}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backIcon}>←</Text>
+            <Text style={styles.backIcon}>‹</Text>
           </TouchableOpacity>
           <Text style={styles.stepLabel}>Step 1 of 3</Text>
+          <View style={{ width: 44 }} />
         </View>
 
-        <View style={styles.dots}>
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotActive]} />
-        </View>
+        {/* Title */}
+        <Text style={styles.title}>Set up profile</Text>
+        <Text style={styles.subtitle}>Personalize your experience</Text>
 
-        <Text style={styles.title}>{STRINGS.onboarding.profileTitle}</Text>
-        <Text style={styles.subtitle}>{STRINGS.onboarding.profileSubtitle}</Text>
-
-        <View style={styles.form}>
-          <TouchableOpacity style={styles.avatarContainer} onPress={handlePickImage}>
-            {avatarUri ? (
-              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
-            ) : (
-              <View style={styles.avatarPlaceholder}>
-                <Text style={styles.avatarIcon}>👤</Text>
-              </View>
-            )}
-            <Text style={styles.avatarLabel}>Tap to add photo</Text>
-          </TouchableOpacity>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Full Name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Rahul Sharma"
-              placeholderTextColor={COLORS.textTertiary}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email (Optional)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="rahul@example.com"
-              placeholderTextColor={COLORS.textTertiary}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>What best describes you?</Text>
-            <View style={styles.personaContainer}>
-              {ONBOARDING.personas.map(p => (
-                <TouchableOpacity
-                  key={p.id}
-                  style={[
-                    styles.personaChip,
-                    persona === p.id && styles.personaChipActive
-                  ]}
-                  onPress={() => setPersona(p.id)}
-                >
-                  <Text style={[
-                    styles.personaText,
-                    persona === p.id && styles.personaTextActive
-                  ]}>
-                    {p.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+        {/* Avatar */}
+        <TouchableOpacity style={styles.avatarWrapper} onPress={handlePickImage} activeOpacity={0.8}>
+          {avatarUri ? (
+            <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarPlaceholder}>
+              <Text style={styles.avatarEmoji}>🧑</Text>
             </View>
-          </View>
+          )}
+          <Text style={styles.avatarLabel}>Tap to add photo</Text>
+        </TouchableOpacity>
+
+        {/* Full Name */}
+        <Text style={styles.inputLabel}>FULL NAME</Text>
+        <TextInput
+          style={[styles.input, styles.inputActive]}
+          placeholder="e.g. Anubhav Raj"
+          placeholderTextColor="#4A5068"
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+        />
+
+        {/* Email */}
+        <Text style={styles.inputLabel}>EMAIL</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="anubhav@gmail.com"
+          placeholderTextColor="#4A5068"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          editable={!user?.primaryEmailAddress}
+        />
+
+        {/* Persona */}
+        <Text style={styles.inputLabel}>I AM A...</Text>
+        <View style={styles.personaRow}>
+          {PERSONAS.map(p => (
+            <TouchableOpacity
+              key={p.id}
+              style={[styles.personaChip, persona === p.id && styles.personaChipActive]}
+              onPress={() => setPersona(p.id)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.personaText, persona === p.id && styles.personaTextActive]}>
+                {p.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <TouchableOpacity 
+        {/* Continue button */}
+        <TouchableOpacity
           style={[styles.continueButton, !name.trim() && styles.continueButtonDisabled]}
           onPress={handleContinue}
-          disabled={!name.trim()}
+          disabled={!name.trim() || uploading}
+          activeOpacity={0.85}
         >
-          <Text style={styles.continueButtonText}>Continue</Text>
+          {uploading ? (
+            <ActivityIndicator color="#0D0F14" />
+          ) : (
+            <Text style={styles.continueButtonText}>Continue</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -138,149 +141,147 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#0D0F14',
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: SPACING.screenHorizontal,
     paddingTop: SPACING.screenTop,
-    paddingBottom: SPACING.huge,
+    paddingBottom: 48,
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SPACING.xl,
+    justifyContent: 'space-between',
+    marginBottom: 32,
   },
   backButton: {
-    padding: SPACING.xs,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: '#1C1F2A',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backIcon: {
+    fontSize: 28,
     color: COLORS.textPrimary,
-    fontSize: 24,
+    lineHeight: 32,
+    marginTop: -2,
   },
   stepLabel: {
     fontFamily: FONTS.bodyMedium,
     fontSize: FONT_SIZE.bodySmall,
-    color: COLORS.textSecondary,
-  },
-  dots: {
-    flexDirection: 'row',
-    marginBottom: SPACING.xl,
-    gap: SPACING.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: RADIUS.circle,
-    backgroundColor: COLORS.surfaceHover,
-  },
-  dotActive: {
-    backgroundColor: COLORS.primary,
-    width: 24,
+    color: '#9AA0B2',
   },
   title: {
-    fontFamily: FONTS.display,
-    fontSize: FONT_SIZE.h2,
+    fontFamily: FONTS.displayBold,
+    fontSize: 30,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
+    marginBottom: 6,
   },
   subtitle: {
     fontFamily: FONTS.body,
     fontSize: FONT_SIZE.body,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xxl,
+    color: '#9AA0B2',
+    marginBottom: 30,
   },
-  form: {
-    flex: 1,
-  },
-  avatarContainer: {
+  avatarWrapper: {
     alignItems: 'center',
-    marginBottom: SPACING.xxl,
+    marginBottom: 30,
   },
   avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: '#1C2A26',
+    borderWidth: 2.5,
+    borderColor: COLORS.primary,
     borderStyle: 'dashed',
-    borderColor: COLORS.borderEmphasized,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.surfaceElevated,
-    marginBottom: SPACING.sm,
+    marginBottom: 10,
   },
   avatarImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: SPACING.sm,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    borderWidth: 2.5,
+    borderColor: COLORS.primary,
+    marginBottom: 10,
   },
-  avatarIcon: {
-    fontSize: 32,
+  avatarEmoji: {
+    fontSize: 38,
   },
   avatarLabel: {
-    fontFamily: FONTS.body,
-    fontSize: FONT_SIZE.caption,
-    color: COLORS.textSecondary,
-  },
-  inputGroup: {
-    marginBottom: SPACING.xl,
+    fontFamily: FONTS.bodyMedium,
+    fontSize: 14,
+    color: COLORS.primary,
   },
   inputLabel: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: FONT_SIZE.bodySmall,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.sm,
+    fontSize: 11,
+    color: '#6B7280',
+    letterSpacing: 1,
+    marginBottom: 8,
+    marginTop: 18,
   },
   input: {
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 1,
-    borderColor: COLORS.borderEmphasized,
-    borderRadius: RADIUS.md,
-    padding: SPACING.md,
-    fontFamily: FONTS.body,
+    backgroundColor: '#1C1F2A',
+    borderRadius: RADIUS.lg,
+    paddingVertical: 15,
+    paddingHorizontal: 18,
+    fontFamily: FONTS.bodyMedium,
     fontSize: FONT_SIZE.body,
     color: COLORS.textPrimary,
+    borderWidth: 1.5,
+    borderColor: '#2A2F40',
   },
-  personaContainer: {
+  inputActive: {
+    borderColor: COLORS.primary,
+    backgroundColor: 'rgba(42,255,214,0.06)',
+  },
+  personaRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING.sm,
+    gap: 10,
+    marginTop: 4,
   },
   personaChip: {
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.surfaceElevated,
-    borderWidth: 1,
-    borderColor: COLORS.borderEmphasized,
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: '#1C1F2A',
+    borderWidth: 1.5,
+    borderColor: '#2A2F40',
+    alignItems: 'center',
   },
   personaChipActive: {
-    backgroundColor: COLORS.primaryBg || 'rgba(42,255,214,0.10)',
-    borderColor: COLORS.primaryBorder || 'rgba(42,255,214,0.22)',
+    backgroundColor: 'rgba(42,255,214,0.10)',
+    borderColor: COLORS.primary,
   },
   personaText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: FONT_SIZE.bodySmall,
-    color: COLORS.textSecondary,
+    fontSize: 13,
+    color: '#9AA0B2',
+    textAlign: 'center',
   },
   personaTextActive: {
     color: COLORS.primary,
   },
   continueButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.xl,
+    paddingVertical: 17,
+    borderRadius: 100,
     alignItems: 'center',
-    marginTop: SPACING.xl,
+    marginTop: 32,
   },
   continueButtonDisabled: {
-    backgroundColor: COLORS.surfaceHover,
+    backgroundColor: '#1E2330',
   },
   continueButtonText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: FONT_SIZE.body,
-    color: COLORS.background,
-  }
+    fontSize: 17,
+    color: '#0D0F14',
+    letterSpacing: 0.2,
+  },
 });

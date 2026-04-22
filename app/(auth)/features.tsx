@@ -1,54 +1,75 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS, STRINGS, CURRENCY } from '@/constants';
+import { COLORS, FONTS, FONT_SIZE, SPACING, RADIUS } from '@/constants';
 
 export default function FeaturesScreen() {
   const router = useRouter();
 
-  const renderGoalCard = (icon: string, name: string, progress: number, amount: number, color: string) => (
-    <View style={styles.goalCard}>
-      <View style={styles.goalCardHeader}>
-        <View style={[styles.iconBox, { backgroundColor: color + '22' }]}>
-          <Text style={styles.goalIcon}>{icon}</Text>
-        </View>
-        <View style={styles.goalInfo}>
-          <Text style={styles.goalName}>{name}</Text>
-          <Text style={styles.goalAmount}>of {CURRENCY.format(amount, true)}</Text>
-        </View>
-        <Text style={[styles.goalPercent, { color }]}>{progress}%</Text>
-      </View>
-      <View style={styles.cardProgressTrack}>
-        <View style={[styles.cardProgressFill, { width: `${progress}%`, backgroundColor: color }]} />
-      </View>
-    </View>
-  );
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.headerIconBox}>
-          <Text style={styles.headerIcon}>🎯</Text>
+        {/* Airplane icon box */}
+        <View style={styles.iconBox}>
+          <Text style={styles.iconEmoji}>✈️</Text>
         </View>
-        
-        <Text style={styles.title}>{STRINGS.onboarding.featuresTitle}</Text>
-        <Text style={styles.body}>{STRINGS.onboarding.featuresBody}</Text>
 
+        {/* Headline */}
+        <Text style={styles.title}>
+          {'Smart goals\nthat '}
+          <Text style={styles.titleAccent}>adapt.</Text>
+        </Text>
+        <Text style={styles.body}>
+          Set a goal — Goa trip, new laptop, emergency fund. FlowWise watches your spending and tells you if you're on track in real time.
+        </Text>
+
+        {/* Goal cards */}
         <View style={styles.previewContainer}>
-          {renderGoalCard('🏖️', 'Goa trip', 53, 5000000, COLORS.primary)}
-          {renderGoalCard('💻', 'MacBook Pro', 17, 12000000, COLORS.warning)}
+          {/* Goa Trip - active/selected style */}
+          <View style={styles.goalCardActive}>
+            <View style={styles.goalCardRow}>
+              <View style={styles.goalIconBoxActive}>
+                <Text style={styles.goalIconEmoji}>🏖️</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.goalNameActive}>Goa Trip</Text>
+              </View>
+              <View style={styles.onTrackBadge}>
+                <Text style={styles.onTrackText}>On track</Text>
+              </View>
+            </View>
+            <Text style={styles.goalAmountActive}>₹ 8,000</Text>
+            <View style={styles.goalProgressRow}>
+              <View style={styles.progressTrackActive}>
+                <View style={[styles.progressFill, { width: '53%', backgroundColor: COLORS.primary }]} />
+              </View>
+              <Text style={styles.goalOfText}>of ₹ 15,000</Text>
+            </View>
+          </View>
+
+          {/* MacBook Pro */}
+          <View style={styles.goalCard}>
+            <View style={styles.goalCardRow}>
+              <View style={styles.goalIconBox}>
+                <Text style={styles.goalIconEmoji}>💻</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.goalName}>MacBook Pro</Text>
+                <View style={styles.progressTrack}>
+                  <View style={[styles.progressFill, { width: '17%', backgroundColor: '#5E8BFF' }]} />
+                </View>
+              </View>
+              <Text style={styles.goalPercent}>17%</Text>
+            </View>
+          </View>
         </View>
       </View>
 
+      {/* Bottom */}
       <View style={styles.footer}>
-        <View style={styles.dots}>
-          <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-        </View>
-
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.primaryButton}
-          onPress={() => router.push('/(auth)/profile')}
+          onPress={() => router.push('/(auth)/sign-up')}
+          activeOpacity={0.85}
         >
           <Text style={styles.primaryButtonText}>Next</Text>
         </TouchableOpacity>
@@ -60,124 +81,164 @@ export default function FeaturesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: '#0D0F14',
     justifyContent: 'space-between',
   },
   content: {
     flex: 1,
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingTop: SPACING.screenTop + SPACING.xl,
+    paddingTop: SPACING.screenTop + 16,
   },
-  headerIconBox: {
-    width: 56,
-    height: 56,
-    borderRadius: RADIUS.lg,
-    backgroundColor: COLORS.primaryBg || 'rgba(42,255,214,0.10)',
+  iconBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 20,
+    backgroundColor: '#1B2E3C',
+    borderWidth: 1.5,
+    borderColor: 'rgba(42,255,214,0.22)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SPACING.xl,
-    borderWidth: 1,
-    borderColor: COLORS.primaryBorder || 'rgba(42,255,214,0.22)',
+    marginBottom: 26,
   },
-  headerIcon: {
-    fontSize: 28,
+  iconEmoji: {
+    fontSize: 36,
   },
   title: {
-    fontFamily: FONTS.display,
-    fontSize: FONT_SIZE.h1,
+    fontFamily: FONTS.displayBold,
+    fontSize: 36,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.sm,
-    lineHeight: 34,
+    lineHeight: 44,
+    marginBottom: 14,
+  },
+  titleAccent: {
+    color: COLORS.primary,
   },
   body: {
     fontFamily: FONTS.body,
     fontSize: FONT_SIZE.body,
-    color: COLORS.textSecondary,
-    lineHeight: 22,
-    marginBottom: SPACING.xxl,
+    color: '#9AA0B2',
+    lineHeight: 24,
+    marginBottom: 32,
   },
   previewContainer: {
-    gap: SPACING.md,
+    gap: 14,
   },
-  goalCard: {
-    backgroundColor: COLORS.surfaceElevated,
-    padding: SPACING.md,
+  // ACTIVE goal card (Goa Trip)
+  goalCardActive: {
+    backgroundColor: '#1C2530',
     borderRadius: RADIUS.card,
+    padding: 18,
     borderWidth: 1,
-    borderColor: COLORS.borderEmphasized,
+    borderColor: 'rgba(42,255,214,0.18)',
   },
-  goalCardHeader: {
+  goalCardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: 10,
+    gap: 12,
   },
-  iconBox: {
+  goalIconBoxActive: {
     width: 40,
     height: 40,
-    borderRadius: RADIUS.md,
+    borderRadius: 10,
+    backgroundColor: '#F5F5F522',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.sm,
   },
-  goalIcon: {
-    fontSize: 20,
+  goalNameActive: {
+    fontFamily: FONTS.bodyMedium,
+    fontSize: FONT_SIZE.body,
+    color: COLORS.textPrimary,
   },
-  goalInfo: {
+  onTrackBadge: {
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    borderRadius: 100,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+  },
+  onTrackText: {
+    fontFamily: FONTS.bodyMedium,
+    fontSize: 12,
+    color: COLORS.primary,
+  },
+  goalAmountActive: {
+    fontFamily: FONTS.displayBold,
+    fontSize: 28,
+    color: COLORS.primary,
+    marginBottom: 10,
+  },
+  goalProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  progressTrackActive: {
     flex: 1,
+    height: 5,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 100,
+  },
+  goalOfText: {
+    fontFamily: FONTS.body,
+    fontSize: 12,
+    color: '#9AA0B2',
+  },
+  // Regular goal card (MacBook Pro)
+  goalCard: {
+    backgroundColor: '#181B26',
+    borderRadius: RADIUS.card,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#2A2F40',
+  },
+  goalIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#252A3A',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  goalIconEmoji: {
+    fontSize: 22,
   },
   goalName: {
     fontFamily: FONTS.bodyMedium,
     fontSize: FONT_SIZE.body,
     color: COLORS.textPrimary,
+    marginBottom: 6,
   },
-  goalAmount: {
-    fontFamily: FONTS.body,
-    fontSize: FONT_SIZE.caption,
-    color: COLORS.textSecondary,
-  },
-  goalPercent: {
-    fontFamily: FONTS.display,
-    fontSize: FONT_SIZE.h3,
-  },
-  cardProgressTrack: {
-    height: 6,
-    backgroundColor: COLORS.surfaceHover,
-    borderRadius: RADIUS.pill,
+  progressTrack: {
+    height: 5,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderRadius: 100,
     overflow: 'hidden',
   },
-  cardProgressFill: {
-    height: '100%',
-    borderRadius: RADIUS.pill,
+  goalPercent: {
+    fontFamily: FONTS.bodyMedium,
+    fontSize: FONT_SIZE.body,
+    color: '#5E8BFF',
   },
   footer: {
     paddingHorizontal: SPACING.screenHorizontal,
-    paddingBottom: SPACING.huge,
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: SPACING.xl,
-    gap: SPACING.xs,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: RADIUS.circle,
-    backgroundColor: COLORS.surfaceHover,
-  },
-  dotActive: {
-    backgroundColor: COLORS.primary,
-    width: 24,
+    paddingBottom: 40,
   },
   primaryButton: {
     backgroundColor: COLORS.primary,
-    paddingVertical: SPACING.md,
-    borderRadius: RADIUS.xl,
+    paddingVertical: 17,
+    borderRadius: 100,
     alignItems: 'center',
   },
   primaryButtonText: {
     fontFamily: FONTS.bodyMedium,
-    fontSize: FONT_SIZE.body,
-    color: COLORS.background,
-  }
+    fontSize: 17,
+    color: '#0D0F14',
+    letterSpacing: 0.2,
+  },
 });
